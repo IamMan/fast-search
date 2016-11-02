@@ -91,7 +91,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
     this.iterateSearch = function () {
         var current = self.currentSearchIterator.next();
         while(!current.done) {
-            self.resultsController.addProduct(current.value);
+            self.resultsController.addProductHighlighted(current.value, self.currentSearchValue);
             if (self.resultsController.isVisibleFull()) {
                 break;
             }
@@ -112,13 +112,20 @@ function ProductsController(selector, initialProducts) {
 
     this.addProduct = function (product) {
         products.push(product);
-        self.addToDom(product)
+        self.addToDom(product.title, product.description);
     };
 
-    this.addToDom = function (product) {
+    this.addProductHighlighted = function (product, text) {
+        products.push(product);
+        var productTitle = product.title.replace(text, "<span style=\"background-color: yellow;\">" + text + "</span>");
+        var productDescription = product.description;
+        self.addToDom(productTitle, productDescription);
+    };
+
+    this.addToDom = function (productTitle, productDescription) {
         var elem = "<div class='product'>" +
-            "<div class='title'>" + product.title + "</div>" +
-            "<div class='description'>" + product.description + "</div>" +
+            "<div class='title'>" + productTitle + "</div>" +
+            "<div class='description'>" + productDescription + "</div>" +
             "</div>";
         self.element.insertAdjacentHTML('beforeend', elem);
     };
@@ -142,8 +149,7 @@ function ProductsController(selector, initialProducts) {
 
 var simpleSearchEngine;
 simpleSearchEngine = new function () {
-    var products = [];
-    this.products = products;
+    this.products = [];
     var self = this;
 
     this.initialize = function (products) {
