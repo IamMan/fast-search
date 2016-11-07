@@ -46,8 +46,8 @@ function SearchBoxController(selector, products, results, searchEngine) {
     };
 
     searchBox.addEventListener("input", function () {
-        if (self.previousIntervalId != 0) clearInterval(self.previousIntervalId);
-        self.previousIntervalId = setInterval(self.makeSearch, globalConfigs.SEARCH_DELAY)
+        if (self.previousIntervalId != 0) clearTimeout(self.previousIntervalId);
+        self.previousIntervalId = setTimeout(self.makeSearch, globalConfigs.SEARCH_DELAY)
     });
 
     this.canSearchBoxContinue = function (oldValue, newValue) {
@@ -71,7 +71,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
 
                 self.currentSearchValue = self.searchBox.value;
                 self.currentSearchIterator = self.searchEngine.makeIterator(self.currentSearchValue);
-                self.resultsController.element.addEventListener("scroll", self.iterateSearch);
+                window.addEventListener("scroll", self.iterateSearch);
                 self.iterateSearch()
             } else {
                 self.hideResults()
@@ -83,7 +83,8 @@ function SearchBoxController(selector, products, results, searchEngine) {
     this.cleanState = function () {
         self.currentSearchIterator = null;
         self.currentSearchValue = "";
-        self.resultsController.element.removeEventListener("scroll", self.iterateSearch);
+        // self.resultsController.element.removeEventListener("scroll", self.iterateSearch);
+        window.removeEventListener("scroll", self.iterateSearch);
         self.resultsController.element.innerHTML = "";
         self.previousIntervalId = 0;
     };
@@ -138,9 +139,27 @@ function ProductsController(selector, initialProducts) {
         element.classList.remove("hidden")
     };
 
+    function isVisible(element) {
+        var docViewTop = window.pageYOffset;
+        var docViewBottom = docViewTop + window.innerHeight;
+
+        var elemTop = element.offsetTop;
+        var elemBottom = element.scrollHeight;
+        while(element.offsetParent) {
+            element = element.offsetParent;
+            elemTop += element.offsetTop;
+        }
+        elemBottom += elemTop;
+
+        return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+    }
+
     this.isVisibleFull = function () {
-        return false
+        var lastChild = self.element.lastChild;
+        var isLastChildVisible = isVisible(lastChild);
+        return !isLastChildVisible
     };
+
 
     if (initialProducts != null) {
         initialProducts.forEach(this.addProduct);
