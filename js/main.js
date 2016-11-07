@@ -102,7 +102,6 @@ function SearchBoxController(selector, products, results, searchEngine) {
     }
 }
 
-
 function ProductsController(selector, initialProducts) {
     var element = document.getElementsByClassName(selector)[0];
     this.element = element;
