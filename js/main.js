@@ -20,6 +20,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
     this.searchEngine = searchEngine;
     this.searchEngine.initialize(products.products);
     this.currentSearchIterator = null;
+    this.currentProductsIterator = null;
     this.currentSearchValue = "";
 
     var productsController = products;
@@ -31,19 +32,35 @@ function SearchBoxController(selector, products, results, searchEngine) {
 
     var self = this;
 
-    productsController.show();
-    resultsController.hide();
-
     self.previousIntervalId = 0;
 
+    function makeIterator(array){
+        var nextIndex = 0;
+
+        return {
+            next: function(){
+                return nextIndex < array.length ?
+                {value: array[nextIndex++], done: false} :
+                {done: true};
+            }
+        }
+    }
+
     this.hideResults = function () {
-        resultsController.hide();
-        productsController.show();
+        self.resultsController.hide();
+        self.productsController.show();
+
+        self.currentProductsIterator = makeIterator(self.productsController.products);
+        self.iterateProducts();
+        window.addEventListener("scroll", self.iterateProducts);
     };
 
     this.showResults = function () {
-        productsController.hide();
-        resultsController.show();
+        self.productsController.hide();
+        self.resultsController.show();
+
+        self.currentProductsIterator = null;
+        window.removeEventListener("scroll", self.iterateProducts);
     };
 
     searchBox.addEventListener("input", function () {
@@ -52,7 +69,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
     });
 
     this.makeSearch = function () {
-        self.cleanState();
+        self.cleanSearch();
         if (self.searchBox.value.length > 0) {
             if (self.currentSearchValue.length == 0) self.showResults();
             self.currentSearchValue = self.searchBox.value;
@@ -64,27 +81,36 @@ function SearchBoxController(selector, products, results, searchEngine) {
         }
     };
 
-    this.cleanState = function () {
+    this.cleanSearch = function () {
         self.currentSearchIterator = null;
         self.currentSearchValue = "";
         window.removeEventListener("scroll", self.iterateSearch);
         self.resultsController.element.innerHTML = "";
         self.previousIntervalId = 0;
-
     };
 
     this.iterateSearch = function () {
-        if (self.resultsController.isVisibleFull()) {
+        self.iterateController(self.resultsController, self.currentSearchIterator, self.currentSearchValue)
+    };
+
+    this.iterateProducts = function () {
+        self.iterateController(self.productsController, self.currentProductsIterator, "")
+    };
+
+    this.iterateController = function (controller, iterator, highlightedText) {
+        if (controller.isVisibleFull()) {
             return;
         }
-        var current = self.currentSearchIterator.next();
+        var current = iterator.next();
         var batchLast = globalConfigs.VISIBLE_ADD_BATCH;
         while (!current.done && batchLast > 0) {
-            self.resultsController.addProductHighlighted(current.value, self.currentSearchValue);
+            controller.addProductHighlighted(current.value, highlightedText);
             batchLast--;
-            current = self.currentSearchIterator.next();
+            current = iterator.next();
         }
     }
+
+    this.hideResults()
 }
 
 function ProductsController(selector, initialProducts) {
