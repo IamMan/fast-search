@@ -88,17 +88,24 @@ function SearchBoxController(selector, products, results, searchEngine) {
         self.resultsController.element.innerHTML = "";
         self.previousIntervalId = 0;
         self.currentIterableCount = 0;
+        self.footerAdded = false;
     };
 
     this.iterateSearch = function () {
-        self.iterateController(self.resultsController, self.currentSearchIterator, self.currentSearchValue)
+        self.iterateController(self.resultsController, self.currentSearchIterator, self.currentSearchValue, function () {
+            if (!self.footerAdded) {
+                self.resultsController.addFooter("Search finished");
+                self.footerAdded = true;
+            }
+        });
     };
 
     this.iterateProducts = function () {
         self.iterateController(self.productsController, self.currentProductsIterator, "")
+
     };
 
-    this.iterateController = function (controller, iterator, highlightedText) {
+    this.iterateController = function (controller, iterator, highlightedText, onDone) {
         if (controller.isVisibleFull()) {
             return;
         }
@@ -108,6 +115,9 @@ function SearchBoxController(selector, products, results, searchEngine) {
             controller.addProductHighlighted(current.value, highlightedText);
             batchLast--;
             current = iterator.next();
+        }
+        if (current.done) {
+            if(onDone != null) onDone()
         }
     };
 
@@ -126,6 +136,11 @@ function ProductsController(selector, initialProducts) {
     function preg_quote( str ) {
         return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
     }
+
+    this.addFooter = function (text) {
+        var elem = "<div class=\"well\">" + text + "</div>";
+        self.element.insertAdjacentHTML('beforeend', elem);
+    };
 
     this.addProductHighlighted = function (product, text) {
         products.push(product);
