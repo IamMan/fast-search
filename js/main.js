@@ -23,10 +23,8 @@ function SearchBoxController(selector, products, results, searchEngine) {
     this.currentProductsIterator = null;
     this.currentSearchValue = "";
 
-    var productsController = products;
-    this.productsController = productsController;
-    var resultsController = results;
-    this.resultsController = resultsController;
+    this.productsController = products;
+    this.resultsController = results;
 
     this.previousIntervalId = 0;
 
@@ -108,7 +106,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
             batchLast--;
             current = iterator.next();
         }
-    }
+    };
 
     this.hideResults()
 }
@@ -121,11 +119,6 @@ function ProductsController(selector, initialProducts) {
     this.products = products;
 
     var self = this;
-
-    this.addProduct = function (product) {
-        products.push(product);
-        self.addToDom(product.title, product.description);
-    };
 
     this.addProductHighlighted = function (product, text) {
         products.push(product);
