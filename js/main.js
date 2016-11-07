@@ -9,7 +9,6 @@ var globalConfigs = {
 
 var configs = new function() {
     this.SEARCH_INPUT_ID = "search";
-    this.SEARCH_CONTAINER_ID = "container";
     this.SEARCH_RESULTS_DIV_CLASS = "results";
     this.PRODUCTS_DIV_CLASS = "products";
 };
