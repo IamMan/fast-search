@@ -4,7 +4,8 @@
 
 var globalConfigs = {
     SEARCH_DELAY : 100,
-    HEIGHT_SCROLL_OFFSET : 300
+    HEIGHT_SCROLL_OFFSET : 300,
+    VISIBLE_ADD_BATCH: 30,
 };
 
 var configs = new function() {
@@ -61,22 +62,16 @@ function SearchBoxController(selector, products, results, searchEngine) {
     };
 
     this.makeSearch = function () {
-        // if (self.canContinueCurrentSearch()) {
-        //     self.currentSearchValue = self.searchBox.value;
-        //     self.currentSearchIterator = self.searchEngine.continueIterator(self.currentSearchValue, self.currentSearchIterator);
-        // } else {
-            self.cleanState();
-            if (self.searchBox.value.length > 0) {
-                if (self.currentSearchValue.length == 0) self.showResults();
-                self.currentSearchValue = self.searchBox.value;
-                self.currentSearchIterator = self.searchEngine.makeIterator(self.currentSearchValue);
-                window.addEventListener("scroll", self.iterateSearch);
-                self.iterateSearch()
-            } else {
-                self.hideResults()
-            }
-
-        // }
+        self.cleanState();
+        if (self.searchBox.value.length > 0) {
+            if (self.currentSearchValue.length == 0) self.showResults();
+            self.currentSearchValue = self.searchBox.value;
+            self.currentSearchIterator = self.searchEngine.makeIterator(self.currentSearchValue);
+            window.addEventListener("scroll", self.iterateSearch);
+            self.iterateSearch()
+        } else {
+            self.hideResults()
+        }
     };
 
     this.cleanState = function () {
@@ -85,6 +80,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
         window.removeEventListener("scroll", self.iterateSearch);
         self.resultsController.element.innerHTML = "";
         self.previousIntervalId = 0;
+
     };
 
     this.iterateSearch = function () {
@@ -92,11 +88,10 @@ function SearchBoxController(selector, products, results, searchEngine) {
             return;
         }
         var current = self.currentSearchIterator.next();
-        while (!current.done) {
+        var batchLast = globalConfigs.VISIBLE_ADD_BATCH;
+        while (!current.done && batchLast > 0) {
             self.resultsController.addProductHighlighted(current.value, self.currentSearchValue);
-            if (self.resultsController.isVisibleFull()) {
-                return;
-            }
+            batchLast--;
             current = self.currentSearchIterator.next();
         }
     }
@@ -148,10 +143,7 @@ function ProductsController(selector, initialProducts) {
         return windowViewBottom + globalConfigs.HEIGHT_SCROLL_OFFSET < docHeight;
     };
 
-
-    if (initialProducts != null) {
-        initialProducts.forEach(this.addProduct);
-    }
+    this.products = initialProducts
 }
 
 var simpleSearchEngine;
@@ -162,11 +154,6 @@ simpleSearchEngine = new function () {
     this.initialize = function (products) {
         self.products = products;
     };
-
-    this.canContinueCurrentSearch = function (oldValue, newValue) {
-        return newValue.startsWith(oldValue);
-    };
-
 
     this.makeIterator = function (searchValue) {
         var nextIndex = 0;
@@ -187,11 +174,6 @@ simpleSearchEngine = new function () {
             }
         }
     };
-
-    this.continueIterator = function (newValue, oldIterator) {
-        var nextIndex = oldIterator.nextIndex;
-        return self.createInnerIterator(nextIndex, newValue)
-    }
 
 };
 
