@@ -3,7 +3,8 @@
  */
 
 var globalConfigs = {
-    SEARCH_DELAY : 300
+    SEARCH_DELAY : 100,
+    HEIGHT_SCROLL_OFFSET : 300
 };
 
 var configs = new function() {
@@ -68,7 +69,6 @@ function SearchBoxController(selector, products, results, searchEngine) {
             self.cleanState();
             if (self.searchBox.value.length > 0) {
                 if (self.currentSearchValue.length == 0) self.showResults();
-
                 self.currentSearchValue = self.searchBox.value;
                 self.currentSearchIterator = self.searchEngine.makeIterator(self.currentSearchValue);
                 window.addEventListener("scroll", self.iterateSearch);
@@ -83,24 +83,26 @@ function SearchBoxController(selector, products, results, searchEngine) {
     this.cleanState = function () {
         self.currentSearchIterator = null;
         self.currentSearchValue = "";
-        // self.resultsController.element.removeEventListener("scroll", self.iterateSearch);
         window.removeEventListener("scroll", self.iterateSearch);
         self.resultsController.element.innerHTML = "";
         self.previousIntervalId = 0;
     };
 
     this.iterateSearch = function () {
+        if (self.resultsController.isVisibleFull()) {
+            return;
+        }
         var current = self.currentSearchIterator.next();
-        while(!current.done) {
+        while (!current.done) {
             self.resultsController.addProductHighlighted(current.value, self.currentSearchValue);
             if (self.resultsController.isVisibleFull()) {
-                break;
+                return;
             }
             current = self.currentSearchIterator.next();
         }
     }
-
 }
+
 
 function ProductsController(selector, initialProducts) {
     var element = document.getElementsByClassName(selector)[0];
@@ -139,25 +141,13 @@ function ProductsController(selector, initialProducts) {
         element.classList.remove("hidden")
     };
 
-    function isVisible(element) {
-        var docViewTop = window.pageYOffset;
-        var docViewBottom = docViewTop + window.innerHeight;
-
-        var elemTop = element.offsetTop;
-        var elemBottom = element.scrollHeight;
-        while(element.offsetParent) {
-            element = element.offsetParent;
-            elemTop += element.offsetTop;
-        }
-        elemBottom += elemTop;
-
-        return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
-    }
-
     this.isVisibleFull = function () {
-        var lastChild = self.element.lastChild;
-        var isLastChildVisible = isVisible(lastChild);
-        return !isLastChildVisible
+        var windowViewTop = window.pageYOffset;
+        var windowViewBottom = windowViewTop + window.innerHeight;
+
+        var docHeight = document.documentElement.offsetHeight;
+
+        return windowViewBottom + globalConfigs.HEIGHT_SCROLL_OFFSET < docHeight;
     };
 
 
