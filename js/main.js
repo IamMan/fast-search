@@ -51,16 +51,6 @@ function SearchBoxController(selector, products, results, searchEngine) {
         self.previousIntervalId = setTimeout(self.makeSearch, globalConfigs.SEARCH_DELAY)
     });
 
-    this.canSearchBoxContinue = function (oldValue, newValue) {
-      return newValue.startsWith(oldValue) && oldValue.length > 0;
-    };
-
-    this.canContinueCurrentSearch = function() {
-        var newSearchValue = searchBox.value;
-        return self.canSearchBoxContinue(self.currentSearchValue, newSearchValue)
-            && self.searchEngine.canContinueCurrentSearch(self.currentSearchValue, newSearchValue)
-    };
-
     this.makeSearch = function () {
         self.cleanState();
         if (self.searchBox.value.length > 0) {
