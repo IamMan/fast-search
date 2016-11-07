@@ -6,6 +6,7 @@ var globalConfigs = {
     SEARCH_DELAY : 100,
     HEIGHT_SCROLL_OFFSET : 300,
     VISIBLE_ADD_BATCH: 30,
+    IGNORE_CASE: true
 };
 
 var configs = new function() {
@@ -22,6 +23,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
     this.currentSearchIterator = null;
     this.currentProductsIterator = null;
     this.currentSearchValue = "";
+    this.currentIterableCount = 0;
 
     this.productsController = products;
     this.resultsController = results;
@@ -71,7 +73,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
         if (self.searchBox.value.length > 0) {
             if (self.currentSearchValue.length == 0) self.showResults();
             self.currentSearchValue = self.searchBox.value;
-            self.currentSearchIterator = self.searchEngine.makeIterator(self.currentSearchValue);
+            self.currentSearchIterator = self.searchEngine.makeIterator(self.currentSearchValue, globalConfigs.IGNORE_CASE);
             window.addEventListener("scroll", self.iterateSearch);
             self.iterateSearch()
         } else {
@@ -85,6 +87,7 @@ function SearchBoxController(selector, products, results, searchEngine) {
         window.removeEventListener("scroll", self.iterateSearch);
         self.resultsController.element.innerHTML = "";
         self.previousIntervalId = 0;
+        self.currentIterableCount = 0;
     };
 
     this.iterateSearch = function () {
@@ -120,14 +123,24 @@ function ProductsController(selector, initialProducts) {
 
     var self = this;
 
+    function preg_quote( str ) {
+        return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
+    }
+
     this.addProductHighlighted = function (product, text) {
         products.push(product);
-        var productTitle = product.title.replace(text, "<span style=\"background-color: yellow;\">" + text + "</span>");
+
+        var regexParams = '';
+        if (globalConfigs.IGNORE_CASE) regexParams = 'gi';
+        else regexParams = 'g';
+
+        var productTitle = product.title.replace(new RegExp( "(" + preg_quote( text ) + ")",  regexParams), "<span style=\"background-color: yellow;\">$1</span>");
         var productDescription = product.description;
         self.addToDom(productTitle, productDescription);
     };
 
     this.addToDom = function (productTitle, productDescription) {
+
         var elem = "<div class='product panel panel-default'>" +
             "<div class='title panel-heading'>" + productTitle + "</div>" +
             "<div class='description panel-body'>" + productDescription + "</div>" +
@@ -164,16 +177,23 @@ simpleSearchEngine = new function () {
         self.products = products;
     };
 
-    this.makeIterator = function (searchValue) {
+    this.makeIterator = function (searchValue, ignoreCase) {
         var nextIndex = 0;
-        return self.createInnerIterator(nextIndex, searchValue)
+        return self.createInnerIterator(nextIndex, searchValue, ignoreCase)
     };
 
-    this.createInnerIterator = function (nextIndex, searchValue) {
+    this.createInnerIterator = function (nextIndex, searchValue, ignoreCase) {
+        if (ignoreCase == true) {
+            searchValue = searchValue.toLowerCase();
+        }
+
         return {
             next: function () {
                 while (nextIndex < self.products.length) {
-                    if (self.products[nextIndex].title.indexOf(searchValue) >= 0) {
+                    var title = self.products[nextIndex].title;
+                    if (ignoreCase) title = title.toLowerCase();
+
+                    if (title.indexOf(searchValue) >= 0) {
                         return {value: self.products[nextIndex++], done: false, nextIndex: nextIndex}
                     } else {
                         nextIndex++;
