@@ -2,18 +2,18 @@
     /*display: inline-block;*/
     left: 0;
     top: 0;
-    background-color: blue;
+    /*background-color: blue;*/
 }
 .container .products {
-    left: 0;
-    top: 0;
-    background-color: GREEN;
+    /*left: 0;*/
+    /*top: 0;*/
+    /*background-color: GREEN;*/
 }
-.container {
-    width: 300px;
-    position: relative;
-    /*display: ;*/
-}
+/*.container {*/
+    /*width: 300px;*/
+    /*position: relative;*/
+    /*!*display: ;*!*/
+/*}*/
 
 .hidden {
    display: none;

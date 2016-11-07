@@ -4,19 +4,38 @@
     <meta charset="UTF-8">
     <title>Fast Search</title>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
     <link href="css/main.css" rel="stylesheet" type="text/css">
 </head>
+
 <body>
-<div>
-    <label>
-        <input type="text" class="search">
-    </label>
-</div>
 <div class="container">
-    <div class="results hidden">
+    <div class="container" style="padding-bottom: 14px;">
+        <div>
+            <h2>Fast search</h2>
+        </div>
+        <div class="col-lg-6 row">
+            <div class="input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                <input type="text" class="search form-control" placeholder="Search for...">
+            </div>
+        </div>
+        <br>
     </div>
-    <div class="products">
+
+    <div class="results hidden col-lg-9">
+        <div class="well">Nothing found...</div>
     </div>
+    <div class="products col-lg-9">
+    </div>
+
 </div>
 
 <script src="js/products.js" type="application/javascript"></script>

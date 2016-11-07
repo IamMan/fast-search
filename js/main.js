@@ -123,9 +123,9 @@ function ProductsController(selector, initialProducts) {
     };
 
     this.addToDom = function (productTitle, productDescription) {
-        var elem = "<div class='product'>" +
-            "<div class='title'>" + productTitle + "</div>" +
-            "<div class='description'>" + productDescription + "</div>" +
+        var elem = "<div class='product panel panel-default'>" +
+            "<div class='title panel-heading'>" + productTitle + "</div>" +
+            "<div class='description panel-body'>" + productDescription + "</div>" +
             "</div>";
         self.element.insertAdjacentHTML('beforeend', elem);
     };
