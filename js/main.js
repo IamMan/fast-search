@@ -164,10 +164,12 @@ function ProductsController(selector, initialProducts) {
     };
 
     this.hide = function () {
-        element.classList.add("hidden")
+        element.innerHTML = "";
+        element.classList.add("hidden");
     };
 
     this.show = function () {
+        element.innerHTML = "";
         element.classList.remove("hidden")
     };
 
